@@ -93,6 +93,30 @@ func (server Server) Run() {
 			user.GET("/userlist", func(context *gin.Context) {
 				context.JSON(http.StatusOK, server.Userdao.UserList())
 			})
+			role := user.Group("/role")
+			{
+				role.GET("/rolelist", func(c *gin.Context) {
+					c.JSON(http.StatusOK, server.RoleDao.RoleList())
+				})
+				role.POST("/add", func(c *gin.Context) {
+					var input entity.RoleEntity
+					c.ShouldBind(&input)
+					if server.RoleDao.AddRole(input.Name) {
+						c.JSON(http.StatusOK, message.Success())
+						return
+					}
+					c.JSON(http.StatusForbidden, message.Fail())
+				})
+				role.POST("/del", func(c *gin.Context) {
+					var input entity.RoleEntity
+					c.ShouldBind(&input)
+					if server.RoleDao.Del(input.Name) {
+						c.JSON(http.StatusOK, message.Success())
+						return
+					}
+					c.JSON(http.StatusForbidden, message.Fail())
+				})
+			}
 		}
 	}
 	r.Run(":58888")

@@ -70,3 +70,20 @@ func (roledao RoleDao) AddAuth(id int, Auth string) bool {
 	}
 	return true
 }
+
+func (roledao RoleDao) Del(name string) bool {
+	if !roledao.ExistRoleName(name) {
+		return false
+	}
+	err := roledao.db.DB.Model(&entity.RoleEntity{}).Where("name = ?", name).Delete(&entity.RoleEntity{}).Error
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err == nil
+}
+
+func (roledao RoleDao) RoleList() []entity.RoleEntity {
+	var list []entity.RoleEntity
+	roledao.db.DB.Model(&entity.RoleEntity{}).Find(&list)
+	return list
+}
