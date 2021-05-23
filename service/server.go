@@ -72,6 +72,24 @@ func (server Server) Run() {
 		})
 		user := api.Group("/user", server.userAdmin)
 		{
+			user.POST("/add", func(c *gin.Context) {
+				var user entity.UserEntity
+				err := c.ShouldBind(&user)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, message.Fail())
+					return
+				}
+				err = server.Userdao.Add(&user)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusForbidden, gin.H{
+						"err": err,
+					})
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
 			user.GET("/userlist", func(context *gin.Context) {
 				context.JSON(http.StatusOK, server.Userdao.UserList())
 			})
