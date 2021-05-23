@@ -100,7 +100,11 @@ func (server Server) Run() {
 				})
 				role.POST("/add", func(c *gin.Context) {
 					var input entity.RoleEntity
-					c.ShouldBind(&input)
+					err := c.ShouldBind(&input)
+					if err != nil {
+						c.JSON(http.StatusBadRequest, message.Fail())
+						return
+					}
 					if server.RoleDao.AddRole(input.Name) {
 						c.JSON(http.StatusOK, message.Success())
 						return
@@ -109,8 +113,28 @@ func (server Server) Run() {
 				})
 				role.POST("/del", func(c *gin.Context) {
 					var input entity.RoleEntity
-					c.ShouldBind(&input)
+					err := c.ShouldBind(&input)
+					if err != nil {
+						c.JSON(http.StatusBadRequest, message.Fail())
+						return
+					}
 					if server.RoleDao.Del(input.Name) {
+						c.JSON(http.StatusOK, message.Success())
+						return
+					}
+					c.JSON(http.StatusForbidden, message.Fail())
+				})
+				role.POST("/permit", func(c *gin.Context) {
+					m := struct {
+						ID   int
+						Auth string
+					}{}
+					err := c.ShouldBind(&m)
+					if err != nil {
+						c.JSON(http.StatusBadRequest, message.Fail())
+						return
+					}
+					if server.RoleDao.AddAuth(m.ID, m.Auth) {
 						c.JSON(http.StatusOK, message.Success())
 						return
 					}
