@@ -18,7 +18,7 @@ func (userdao UserDao) Check(username string, password string) bool {
 func (userdao UserDao) Exsit(username string) bool {
 	var count int64
 	userdao.db.DB.Model(&entity.UserEntity{}).Where("username = ?", username).Count(&count)
-	return count == 0
+	return count != 0
 }
 
 func (userdao UserDao) Add(user *entity.UserEntity) error {

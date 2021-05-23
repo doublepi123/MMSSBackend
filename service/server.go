@@ -5,6 +5,7 @@ import (
 	"MMSSBackend/entity"
 	"MMSSBackend/message"
 	"MMSSBackend/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -45,6 +46,7 @@ func (server Server) userAdmin(c *gin.Context) {
 	username, _ := c.Cookie("username")
 	roleid := server.RoleDao.GetRoleID(username)
 	if !server.RoleDao.CheckAuth(roleid, "userManage") {
+		fmt.Println(roleid)
 		c.JSON(http.StatusForbidden, message.Fail())
 		c.Abort()
 		return
@@ -53,11 +55,12 @@ func (server Server) userAdmin(c *gin.Context) {
 }
 
 func (server Server) Run() {
-	server.RoleDao.AddAuth(0, "userManage")
+	server.RoleDao.AddRole("Administrator")
+	server.RoleDao.AddAuth(1, "userManage")
 	server.Userdao.Add(&entity.UserEntity{
 		Username: "root",
 		Password: util.GetPWD("toor"),
-		RoleID:   0,
+		RoleID:   1,
 	})
 	r := gin.Default()
 	r.POST("/api/login", server.login)

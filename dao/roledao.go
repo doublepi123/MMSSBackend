@@ -9,14 +9,26 @@ type RoleDao struct {
 	*Dao
 }
 
-func (roledao RoleDao) Exsit(id int) bool {
+func (roledao RoleDao) ExistRoleID(id int) bool {
 	roledao.db.DB.AutoMigrate(&entity.RoleEntity{})
+	roledao.db.DB.AutoMigrate(&entity.AuthEntity{})
 	var count int64
-	err := roledao.db.DB.Model(&entity.RoleEntity{}).Find(id).Count(&count).Error
-	if err != nil {
-		fmt.Println(err)
+	roledao.db.DB.Model(&entity.RoleEntity{}).Find(id).Count(&count)
+	return count != 0
+}
+
+func (RoleDao RoleDao) ExistRoleName(name string) bool {
+	var count int64
+	RoleDao.db.DB.Model(&entity.RoleEntity{}).Where("name = ?", name).Count(&count)
+	return count != 0
+}
+func (roledao RoleDao) AddRole(name string) bool {
+	if roledao.ExistRoleName(name) {
 		return false
 	}
+	roledao.db.DB.Create(&entity.RoleEntity{
+		Name: name,
+	})
 	return true
 }
 
@@ -27,11 +39,11 @@ func (roledao RoleDao) GetRoleID(username string) int {
 }
 
 func (roledao RoleDao) CheckAuth(id int, Auth string) bool {
-	if !roledao.Exsit(id) {
+	if !roledao.ExistRoleID(id) {
 		return false
 	}
 	var count int64
-	err := roledao.db.DB.Model(&entity.RoleEntity{}).Where("roleid = ? AND auth = ?", id, Auth).Count(&count).Error
+	err := roledao.db.DB.Model(&entity.AuthEntity{}).Where("role_id = ? AND auth = ?", id, Auth).Count(&count).Error
 	if err != nil {
 		fmt.Println(err)
 		return false
@@ -40,11 +52,11 @@ func (roledao RoleDao) CheckAuth(id int, Auth string) bool {
 }
 
 func (roledao RoleDao) AddAuth(id int, Auth string) bool {
-	if !roledao.Exsit(id) {
+	if !roledao.ExistRoleID(id) {
 		return false
 	}
 
-	if !roledao.CheckAuth(id, Auth) {
+	if roledao.CheckAuth(id, Auth) {
 		return false
 	}
 	roledao.db.DB.AutoMigrate(&entity.AuthEntity{})
@@ -53,6 +65,7 @@ func (roledao RoleDao) AddAuth(id int, Auth string) bool {
 		Auth:   Auth,
 	}).Error
 	if err != nil {
+		fmt.Println(err)
 		return false
 	}
 	return true
