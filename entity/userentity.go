@@ -26,11 +26,11 @@ type UserEntity struct {
 
 // 返回给前端的用户列表
 type SimpleUser struct {
-	Username  string
-	Name      string
-	UserLevel int
-	Position  string
-	WorkID    string
+	Username string
+	Name     string
+	RoleID   string
+	Position string
+	WorkID   string
 }
 
 const LevelAdministrator = 0

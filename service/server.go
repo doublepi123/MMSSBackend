@@ -72,7 +72,9 @@ func (server Server) Run() {
 		})
 		user := api.Group("/user", server.userAdmin)
 		{
-			user.GET("/userlist")
+			user.GET("/userlist", func(context *gin.Context) {
+				context.JSON(http.StatusOK, server.Userdao.UserList())
+			})
 		}
 	}
 	r.Run(":58888")
