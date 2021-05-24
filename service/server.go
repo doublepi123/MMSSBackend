@@ -71,7 +71,7 @@ func (server Server) Run() {
 	//api的URL组
 	api := r.Group("/api", server.CheckLogin)
 	{
-		//查询当前用户的用户名
+		//查询当前用户的用户名 /api/username
 		api.GET("/username", func(c *gin.Context) {
 			username, _ := c.Cookie("username")
 			c.JSON(http.StatusOK, gin.H{"username": username})
@@ -79,6 +79,20 @@ func (server Server) Run() {
 		user := api.Group("/user", server.userAdmin)
 		{
 			//PATH /api/user
+			//根据username查询某个用户 /api/user/find
+			user.POST("/find", func(c *gin.Context) {
+				m := struct {
+					Username string
+				}{}
+				err := c.ShouldBind(&m)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, message.Fail())
+					return
+				}
+				ans := server.Userdao.Find(m.Username)
+				ans.Password = "******"
+				c.JSON(http.StatusOK, ans)
+			})
 			//查询权限列表 /api/user/authlist
 			user.GET("/authlist", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{
