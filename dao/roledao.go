@@ -9,6 +9,28 @@ type RoleDao struct {
 	*Dao
 }
 
+func (roledao RoleDao) DelAuth(id int, Auth string) bool {
+	if !roledao.ExistRoleID(id) {
+
+		return false
+	}
+	if !roledao.CheckAuth(id, Auth) {
+		return false
+	}
+	err := roledao.db.DB.Model(&entity.AuthEntity{}).Where("role_id = ? AND auth = ?", id, Auth).Delete(&entity.AuthEntity{}).Error
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+func (roledao RoleDao) GetRoleName(id int) string {
+	var role entity.RoleEntity
+	roledao.db.DB.Where("id = ?", id).Find(&role)
+	return role.Name
+}
+
 func (roledao RoleDao) ExistRoleID(id int) bool {
 	roledao.db.DB.AutoMigrate(&entity.RoleEntity{})
 	roledao.db.DB.AutoMigrate(&entity.AuthEntity{})
