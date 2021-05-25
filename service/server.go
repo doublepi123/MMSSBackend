@@ -39,6 +39,7 @@ func (server Server) CheckLogin(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	server.Cookiedao.SetCookie(username, userid, c)
 	c.Next()
 }
 
@@ -68,7 +69,7 @@ func (server Server) Run() {
 	r := gin.Default()
 	//登录接口
 	r.POST("/api/login", server.login)
-	//api的URL组
+	//进入api路径前检查登入状态
 	api := r.Group("/api", server.CheckLogin)
 	{
 		//查询当前用户的用户名 /api/username
@@ -78,7 +79,7 @@ func (server Server) Run() {
 		})
 		self := api.Group("/self")
 		{
-			//修改自己的密码 /api/self/changepwd 	Oldpassword password
+			//修改自己的密码 /api/self/changepwd 	仅两个字段：Oldpassword password
 			self.POST("/changepwd", func(c *gin.Context) {
 				m := struct {
 					Oldpassword string
@@ -102,6 +103,24 @@ func (server Server) Run() {
 				if err != nil {
 					fmt.Println(err)
 					c.JSON(http.StatusForbidden, message.Fail())
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
+			//更新自己的的信息 /api/self/update 不需要传Username
+			self.POST("/update", func(c *gin.Context) {
+				username, _ := c.Cookie("username")
+				m := entity.UserEntity{}
+				err := c.ShouldBind(&m)
+				if err != nil {
+					fmt.Println(http.StatusBadRequest, message.Fail())
+					return
+				}
+				m.Username = username
+				err = server.Userdao.Update(&m)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusInternalServerError, message.Fail())
+					return
 				}
 				c.JSON(http.StatusOK, message.Success())
 			})
@@ -144,6 +163,40 @@ func (server Server) Run() {
 					c.JSON(http.StatusForbidden, gin.H{
 						"err": err,
 					})
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
+			//更新用户信息/api/user/update
+			user.POST("/update", func(c *gin.Context) {
+				var user entity.UserEntity
+				err := c.ShouldBind(&user)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, message.Fail())
+					return
+				}
+				err = server.Userdao.Update(&user)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusInternalServerError, message.Fail())
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
+			//删除用户 /api/user/del	Username
+			user.POST("/del", func(c *gin.Context) {
+				var user entity.UserEntity
+				err := c.ShouldBind(&user)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, message.Fail())
+					return
+				}
+				err = server.Userdao.Del(user.Username)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusInternalServerError, message.Fail())
 					return
 				}
 				c.JSON(http.StatusOK, message.Success())
