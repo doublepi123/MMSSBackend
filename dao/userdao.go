@@ -10,6 +10,10 @@ type UserDao struct {
 	*Dao
 }
 
+func (userdao UserDao) ChangePassword(username string, password string) error {
+	return userdao.db.DB.Model(&entity.UserEntity{}).Where("username = ?", username).Update("password", util.GetPWD(password)).Error
+}
+
 func (userdao UserDao) Check(username string, password string) bool {
 	var user entity.UserEntity
 	userdao.db.DB.Where("Username = ?", username).First(&user)

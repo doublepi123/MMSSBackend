@@ -76,10 +76,40 @@ func (server Server) Run() {
 			username, _ := c.Cookie("username")
 			c.JSON(http.StatusOK, gin.H{"username": username})
 		})
+		self := api.Group("/self")
+		{
+			//修改自己的密码 /api/self/changepwd 	Oldpassword password
+			self.POST("/changepwd", func(c *gin.Context) {
+				m := struct {
+					Oldpassword string
+					Password    string
+				}{}
+				err := c.ShouldBind(&m)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, message.Fail())
+					return
+				}
+				username, err := c.Cookie("username")
+				if !server.Userdao.Check(username, m.Oldpassword) {
+					c.JSON(http.StatusForbidden, gin.H{
+						"msg": "Oldpassword is wrong",
+					})
+					return
+				}
+
+				err = server.Userdao.ChangePassword(username, m.Password)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusForbidden, message.Fail())
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
+		}
 		user := api.Group("/user", server.userAdmin)
 		{
 			//PATH /api/user
-			//根据username查询某个用户 /api/user/find
+			//根据username查询某个用户 /api/user/find Username
 			user.POST("/find", func(c *gin.Context) {
 				m := struct {
 					Username string

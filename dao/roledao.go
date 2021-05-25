@@ -45,6 +45,9 @@ func (RoleDao RoleDao) ExistRoleName(name string) bool {
 	return count != 0
 }
 func (roledao RoleDao) AddRole(name string) bool {
+	roledao.db.DB.AutoMigrate(&entity.RoleEntity{})
+	roledao.db.DB.AutoMigrate(&entity.AuthEntity{})
+	roledao.db.DB.AutoMigrate(&entity.UserEntity{})
 	if roledao.ExistRoleName(name) {
 		return false
 	}
