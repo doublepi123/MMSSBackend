@@ -14,6 +14,7 @@ type Server struct {
 	Userdao   *dao.UserDao
 	Cookiedao *dao.CookieDao
 	RoleDao   *dao.RoleDao
+	PaperDao  *dao.PaperDao
 }
 
 func (server Server) login(c *gin.Context) {
@@ -47,6 +48,18 @@ func (server Server) userAdmin(c *gin.Context) {
 	username, _ := c.Cookie("username")
 	roleid := server.RoleDao.GetRoleID(username)
 	if !server.RoleDao.CheckAuth(roleid, "userManage") {
+		fmt.Println(roleid)
+		c.JSON(http.StatusForbidden, message.Fail())
+		c.Abort()
+		return
+	}
+	c.Next()
+}
+
+func (server Server) paperAdmin(c *gin.Context) {
+	username, _ := c.Cookie("username")
+	roleid := server.RoleDao.GetRoleID(username)
+	if !server.RoleDao.CheckAuth(roleid, "paperManage") {
 		fmt.Println(roleid)
 		c.JSON(http.StatusForbidden, message.Fail())
 		c.Abort()
@@ -288,6 +301,94 @@ func (server Server) Run() {
 						return
 					}
 					c.JSON(http.StatusForbidden, message.Fail())
+				})
+			}
+		}
+		paper := api.Group("/paper")
+		{
+			paper.POST("/add", func(c *gin.Context) {
+				m := &entity.PaperEntity{}
+				username, _ := c.Cookie("username")
+				err := c.ShouldBind(m)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{
+						"msg": err,
+					})
+					return
+				}
+				m.UserName = username
+				err = server.PaperDao.Add(m)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, gin.H{
+						"msg": fmt.Sprint(err),
+					})
+					return
+				}
+
+				c.JSON(http.StatusOK, message.Success())
+			})
+
+			paper.POST("/find", func(c *gin.Context) {
+				m := &entity.PaperEntity{}
+				username, _ := c.Cookie("username")
+				err := c.ShouldBind(m)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{
+						"msg": err,
+					})
+					return
+				}
+				m.UserName = username
+				paper, err := server.PaperDao.Find(m.UserName, m.Tittle)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprint(err)})
+					return
+				}
+				c.JSON(http.StatusOK, paper)
+			})
+
+			paper.POST("/adfind", func(c *gin.Context) {
+				m := &entity.PaperEntity{}
+				username, _ := c.Cookie("username")
+				err := c.ShouldBind(m)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, gin.H{
+						"msg": fmt.Sprint(err),
+					})
+					return
+				}
+				m.UserName = username
+				paper, err := server.PaperDao.ADFind(*m)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, gin.H{"msg": err})
+					return
+				}
+				c.JSON(http.StatusOK, paper)
+			})
+			//模糊查询
+			papera := paper.Group("/admin", server.paperAdmin)
+			{
+				papera.POST("/adfind", func(c *gin.Context) {
+					m := &entity.PaperEntity{}
+					err := c.ShouldBind(m)
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusBadRequest, gin.H{
+							"msg": fmt.Sprint(err),
+						})
+						return
+					}
+					paper, err := server.PaperDao.ADFind(*m)
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusBadRequest, gin.H{"msg": err})
+						return
+					}
+					c.JSON(http.StatusOK, paper)
 				})
 			}
 		}
