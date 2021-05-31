@@ -73,6 +73,7 @@ func (server Server) Run() {
 	server.RoleDao.AddRole("Administrator")
 	//为Administrator角色赋予userManager权限
 	server.RoleDao.AddAuth(1, "userManage")
+	server.RoleDao.AddAuth(1, "paperManage")
 	//新建用户root
 	server.Userdao.Add(&entity.UserEntity{
 		Username: "root",
