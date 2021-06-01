@@ -17,7 +17,7 @@ type PaperEntity struct {
 	Author string
 	//学院
 	College string
-	ISBN    string `gorm:"unique"`
+	ISBN    string
 	//其他
 	Other string
 }

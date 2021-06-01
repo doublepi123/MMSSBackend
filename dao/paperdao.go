@@ -1,31 +1,47 @@
 package dao
 
-import "MMSSBackend/entity"
+import (
+	"MMSSBackend/entity"
+	"errors"
+	"fmt"
+)
 
-type Paperdao struct {
+type PaperDao struct {
 	*Dao
 }
 
-func (paperdao Paperdao) AddPaper(paper *entity.PaperEntity) bool {
+func (paperdao PaperDao) Add(paper *entity.PaperEntity) error {
+	var count int64
 	paperdao.db.DB.AutoMigrate(&entity.PaperEntity{})
-	paperdao.db.DB.AutoMigrate(&entity.PaperFile{})
-	paperdao.db.DB.AutoMigrate(&entity.PaperAuth{})
-	thispaper := entity.PaperEntity{}
-	if paperdao.ExistPaper(paper) {
-		return false
+	err := paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ? AND tittle = ?",
+		paper.UserName, paper.Tittle).Count(&count).Error
+	if err != nil {
+		return err
 	}
-	paperdao.db.DB.Create(paper)
-	paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ? AND tittle = ？ ", paper.UserName, paper.Tittle).Find(&thispaper)
-	paperdao.db.DB.Create(&entity.PaperAuth{
-		PaperID:  thispaper.ID,
-		Username: thispaper.UserName,
-	})
-	return true
+	fmt.Println(count)
+	if count >= 1 {
+		return errors.New("paper exist")
+	}
+	err = paperdao.db.DB.Model(&entity.UserEntity{}).Where("username = ?", paper.UserName).Count(&count).Error
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return errors.New("user not exist")
+	}
+	return paperdao.db.DB.Create(&paper).Error
+
 }
 
-func (paperdao Paperdao) ExistPaper(paper *entity.PaperEntity) bool {
-	var count int64
-	paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ? AND tittle = ?", paper.UserName, paper.Tittle).Count(&count)
+func (paperdao PaperDao) Find(username string, tittle string) (entity.PaperEntity, error) {
+	var paper entity.PaperEntity
+	err := paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ? AND tittle = ?", username, tittle).Find(&paper).Error
+	return paper, err
+}
 
-	return count == 1
+func (paperdao PaperDao) ADFind(q entity.PaperEntity) ([]entity.PaperEntity, error) {
+	tx := paperdao.db.DB.Model(&entity.PaperEntity{})
+	var paper []entity.PaperEntity
+	err := tx.Where("user_name LIKE ? AND tittle LIKE ?", "%"+q.UserName+"%", "%"+q.Tittle+"%", "%").Find(&paper).Error
+	return paper, err
 }

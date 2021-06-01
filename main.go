@@ -12,7 +12,8 @@ func main() {
 	userdao := &dao.UserDao{basedao}
 	cookiedao := &dao.CookieDao{basedao}
 	roledao := &dao.RoleDao{basedao}
-	server := service.Server{userdao, cookiedao, roledao}
+	paperdao := &dao.PaperDao{basedao}
+	server := service.Server{userdao, cookiedao, roledao, paperdao}
 	go server.Run()
 	util.PauseForRun()
 }
