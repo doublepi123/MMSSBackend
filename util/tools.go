@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"net/http"
 	"time"
 )
 
@@ -12,6 +13,13 @@ func PauseForRun() {
 	for {
 		time.Sleep(time.Second)
 	}
+}
+
+func MeetError(c *gin.Context, err error) {
+	fmt.Println(err)
+	c.JSON(http.StatusBadRequest, gin.H{
+		"msg": fmt.Sprint(err),
+	})
 }
 
 func ShowBody(c *gin.Context) {

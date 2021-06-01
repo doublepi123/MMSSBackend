@@ -21,7 +21,7 @@ type PaperEntity struct {
 	College string
 	//其他
 	Other string
-	//审核
+	//审核状态
 	Hascheck bool
 }
 
@@ -35,6 +35,8 @@ type PaperList struct {
 	Date string
 	//作者
 	Author string
+	//审核状态
+	Hascheck bool
 }
 
 //论文附件

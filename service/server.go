@@ -333,6 +333,16 @@ func (server Server) Run() {
 
 				c.JSON(http.StatusOK, message.Success())
 			})
+			//查看自己的paperList
+			paper.GET("/list", func(c *gin.Context) {
+				username, _ := c.Cookie("username")
+				paper, err := server.PaperDao.Paperlist(username)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				c.JSON(http.StatusOK, paper)
+			})
 			//查找paper /api/paper/find
 			paper.POST("/find", func(c *gin.Context) {
 				m := &entity.PaperEntity{}
@@ -401,6 +411,7 @@ func (server Server) Run() {
 			paper.POST("/update", func(c *gin.Context) {
 				var paper entity.PaperEntity
 				err := c.ShouldBind(&paper)
+				paper.UserName, _ = c.Cookie("username")
 				if err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprint(err)})
 					return
