@@ -15,7 +15,7 @@ type UserEntity struct {
 	Name          string
 	RoleID        int
 	Position      string
-	WorkID        string
+	WorkID        string `gorm:"not null"`
 	Tittle        string
 	Sex           string
 	BirthDay      time.Time
@@ -32,6 +32,3 @@ type SimpleUser struct {
 	Position string
 	WorkID   string
 }
-
-const LevelAdministrator = 0
-const LevelCommonUser = 1

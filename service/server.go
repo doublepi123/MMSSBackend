@@ -7,6 +7,7 @@ import (
 	"MMSSBackend/util"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -307,8 +308,11 @@ func (server Server) Run() {
 		}
 		paper := api.Group("/paper")
 		{
+			//该path下的接口仅可对自己的论文进行操作
+			//添加paper /api/paper/add
 			paper.POST("/add", func(c *gin.Context) {
 				m := &entity.PaperEntity{}
+				m.Hascheck = false
 				username, _ := c.Cookie("username")
 				err := c.ShouldBind(m)
 				if err != nil {
@@ -329,7 +333,7 @@ func (server Server) Run() {
 
 				c.JSON(http.StatusOK, message.Success())
 			})
-
+			//查找paper /api/paper/find
 			paper.POST("/find", func(c *gin.Context) {
 				m := &entity.PaperEntity{}
 				username, _ := c.Cookie("username")
@@ -349,7 +353,7 @@ func (server Server) Run() {
 				}
 				c.JSON(http.StatusOK, paper)
 			})
-
+			//模糊查找第一作者paper /api/paper/adfind
 			paper.POST("/adfind", func(c *gin.Context) {
 				m := &entity.PaperEntity{}
 				username, _ := c.Cookie("username")
@@ -370,9 +374,76 @@ func (server Server) Run() {
 				}
 				c.JSON(http.StatusOK, paper)
 			})
-			//模糊查询
+			//添加其他作者 /api/paper/auth
+			paper.POST("/auth", func(c *gin.Context) {
+				m := &struct {
+					PaperID uint
+					WorkID  string
+				}{}
+				err := c.ShouldBind(m)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{
+						"msg": fmt.Sprint(err),
+					})
+					return
+				}
+				username, _ := c.Cookie("username")
+				err = server.PaperDao.Auth(m.WorkID, m.PaperID, username)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{
+						"msg": fmt.Sprint(err),
+					})
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
+			//查询非第一作者paper /api/paper/findother
+			paper.POST("/findother", func(c *gin.Context) {
+				username, _ := c.Cookie("username")
+				paper, err := server.PaperDao.AuthSelect(username)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprint(err)})
+					return
+				}
+				c.JSON(http.StatusOK, paper)
+			})
+			//添加附件 /api/paper/addfile
+			paper.POST("/addfile", func(c *gin.Context) {
+				paper := struct {
+					PaperID uint
+				}{}
+				file, header, err := c.Request.FormFile("File")
+				if err != nil {
+					c.JSON(http.StatusBadRequest, message.Fail())
+					return
+				}
+				content, err := ioutil.ReadAll(file)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, message.Fail)
+					return
+				}
+				err = c.ShouldBind(paper)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"err": fmt.Sprint(err)})
+				}
+				err = server.PaperDao.AddFile(&entity.PaperFile{
+					PaperID:  paper.PaperID,
+					File:     content,
+					FileName: header.Filename,
+				})
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
+
+			//管理员的操作
 			papera := paper.Group("/admin", server.paperAdmin)
 			{
+				//模糊查询论文 /api/paper/admin/adfind
 				papera.POST("/adfind", func(c *gin.Context) {
 					m := &entity.PaperEntity{}
 					err := c.ShouldBind(m)
@@ -390,6 +461,74 @@ func (server Server) Run() {
 						return
 					}
 					c.JSON(http.StatusOK, paper)
+				})
+				//查询某篇论文 /api/paper/admin/find
+				paper.POST("/find", func(c *gin.Context) {
+					m := &entity.PaperEntity{}
+					err := c.ShouldBind(m)
+					if err != nil {
+						c.JSON(http.StatusBadRequest, gin.H{
+							"msg": err,
+						})
+						return
+					}
+					paper, err := server.PaperDao.Find(m.UserName, m.Tittle)
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprint(err)})
+						return
+					}
+					c.JSON(http.StatusOK, paper)
+				})
+				//获取未审核的论文列表	/api/paper/admin/uncheck
+				papera.GET("/uncheck", func(c *gin.Context) {
+					papers, err := server.PaperDao.GetUncheckFile()
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusInternalServerError, fmt.Sprint(err))
+						return
+					}
+					c.JSON(http.StatusOK, papers)
+				})
+				//审核某篇论文 /api/paper/admin/check	参数发送PaperID int
+				papera.POST("/check", func(c *gin.Context) {
+					m := struct {
+						PaperID uint
+					}{}
+					err := c.ShouldBind(&m)
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusBadRequest, gin.H{
+							"msg": fmt.Sprint(err),
+						})
+					}
+					err = server.PaperDao.Check(m.PaperID)
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusForbidden, gin.H{"msg": fmt.Sprint(err)})
+						return
+					}
+					c.JSON(http.StatusOK, message.Success())
+				})
+				//取消某篇论文的审核状态 /api/paper/admin/uncheck	参数同上
+				papera.POST("/uncheck", func(c *gin.Context) {
+					m := struct {
+						PaperID uint
+					}{}
+					err := c.ShouldBind(&m)
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusBadRequest, gin.H{
+							"msg": fmt.Sprint(err),
+						})
+					}
+					err = server.PaperDao.UnCheck(m.PaperID)
+					if err != nil {
+						fmt.Println(err)
+						c.JSON(http.StatusForbidden, gin.H{"msg": fmt.Sprint(err)})
+						return
+					}
+					c.JSON(http.StatusOK, message.Success())
 				})
 			}
 		}

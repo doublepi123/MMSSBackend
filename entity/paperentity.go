@@ -1,6 +1,8 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 //论文Model
 type PaperEntity struct {
@@ -17,30 +19,38 @@ type PaperEntity struct {
 	Author string
 	//学院
 	College string
-	ISBN    string
 	//其他
 	Other string
+	//审核
+	Hascheck bool
 }
 
 //论文列表
 type PaperList struct {
+	//PaperID
+	ID uint
 	//标题
 	Tittle string
 	//日期
 	Date string
 	//作者
 	Author string
-	//ISBN
-	ISBN string
 }
 
 //论文附件
 type PaperFile struct {
 	gorm.Model
-	//ISBN 不可重复 作为唯一标识
-	ISBN string `gorm:"unique"`
+	//PaperID 不可重复 作为唯一标识
+	PaperID uint `gorm:"unique"`
 	//二进制文件内容
 	File []byte
 	//文件名
 	FileName string
+}
+
+//其他作者权限
+type PaperAuth struct {
+	gorm.Model
+	PaperID uint
+	WorkID  string
 }
