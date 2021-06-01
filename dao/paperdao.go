@@ -105,17 +105,37 @@ func (paperdao PaperDao) AuthSelect(username string) ([]entity.PaperEntity, erro
 }
 
 func (paperdao PaperDao) AddFile(file *entity.PaperFile) error {
+	tx := paperdao.db.DB.Begin()
 	var count int64
-	err := paperdao.db.DB.Model(&entity.PaperEntity{}).Where("id = ?", file.PaperID).Count(&count).Error
+	fmt.Println(file.ID)
+	err := tx.Model(&entity.PaperEntity{}).Where("id = ?", file.PaperID).Count(&count).Error
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	if count == 0 {
+		tx.Rollback()
 		return errors.New("paper not exist")
 	}
 	paperdao.db.DB.AutoMigrate(&entity.PaperFile{})
-	paperdao.db.DB.Model(&entity.PaperFile{}).Where("paper_id = ? ", file.PaperID).Delete(&entity.PaperFile{})
-	return paperdao.db.DB.Create(file).Error
+	tx.Model(&entity.PaperFile{}).Where("paper_id = ? ", file.PaperID).Delete(&entity.PaperFile{})
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Create(file).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Model(&entity.PaperEntity{}).Where("id = ?", file.PaperID).Update("filename", file.FileName).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
+
 }
 
 func (paperdao PaperDao) GetUncheckFile() ([]entity.PaperList, error) {
@@ -166,4 +186,10 @@ func (paperdao PaperDao) Update(paper entity.PaperEntity) error {
 	}
 	return paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ? AND tittle = ?",
 		paper.UserName, paper.Tittle).Updates(&paper).Error
+}
+
+func (paperdao PaperDao) GetPaper(paperid uint) (entity.PaperEntity, error) {
+	var paper entity.PaperEntity
+	err := paperdao.db.DB.Model(entity.PaperEntity{}).Find(&paper, paperid).Error
+	return paper, err
 }

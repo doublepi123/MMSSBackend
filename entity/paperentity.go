@@ -21,6 +21,8 @@ type PaperEntity struct {
 	College string
 	//其他
 	Other string
+	//附件文件名
+	Filename string
 	//审核状态
 	Hascheck bool
 }
@@ -37,13 +39,15 @@ type PaperList struct {
 	Author string
 	//审核状态
 	Hascheck bool
+	//附件文件名
+	Filename string
 }
 
 //论文附件
 type PaperFile struct {
 	gorm.Model
-	//PaperID 不可重复 作为唯一标识
-	PaperID uint `gorm:"unique"`
+	//PaperID
+	PaperID uint
 	//二进制文件内容
 	File []byte
 	//文件名

@@ -22,7 +22,7 @@ func (server Server) login(c *gin.Context) {
 	var user entity.UserEntity
 	err := c.ShouldBind(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, message.Fail())
+		c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 		return
 	}
 	if server.Userdao.Check(user.Username, user.Password) {
@@ -30,7 +30,7 @@ func (server Server) login(c *gin.Context) {
 		c.JSON(http.StatusOK, message.Success())
 		return
 	}
-	c.JSON(http.StatusForbidden, message.Fail())
+	c.JSON(http.StatusForbidden, gin.H{"msg": "password wrong"})
 }
 
 func (server Server) CheckLogin(c *gin.Context) {
@@ -50,7 +50,9 @@ func (server Server) userAdmin(c *gin.Context) {
 	roleid := server.RoleDao.GetRoleID(username)
 	if !server.RoleDao.CheckAuth(roleid, "userManage") {
 		fmt.Println(roleid)
-		c.JSON(http.StatusForbidden, message.Fail())
+		c.JSON(http.StatusForbidden, gin.H{
+			"message": "not auth",
+		})
 		c.Abort()
 		return
 	}
@@ -62,7 +64,9 @@ func (server Server) paperAdmin(c *gin.Context) {
 	roleid := server.RoleDao.GetRoleID(username)
 	if !server.RoleDao.CheckAuth(roleid, "paperManage") {
 		fmt.Println(roleid)
-		c.JSON(http.StatusForbidden, message.Fail())
+		c.JSON(http.StatusForbidden, gin.H{
+			"message": "not auth",
+		})
 		c.Abort()
 		return
 	}
@@ -103,7 +107,7 @@ func (server Server) Run() {
 				err := c.ShouldBind(&m)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusBadRequest, message.Fail())
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
 				username, err := c.Cookie("username")
@@ -117,7 +121,7 @@ func (server Server) Run() {
 				err = server.Userdao.ChangePassword(username, m.Password)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusForbidden, message.Fail())
+					c.JSON(http.StatusForbidden, fmt.Sprint(err))
 				}
 				c.JSON(http.StatusOK, message.Success())
 			})
@@ -127,14 +131,14 @@ func (server Server) Run() {
 				m := entity.UserEntity{}
 				err := c.ShouldBind(&m)
 				if err != nil {
-					fmt.Println(http.StatusBadRequest, message.Fail())
+					fmt.Println(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
 				m.Username = username
 				err = server.Userdao.Update(&m)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusInternalServerError, message.Fail())
+					c.JSON(http.StatusInternalServerError, fmt.Sprint(err))
 					return
 				}
 				c.JSON(http.StatusOK, message.Success())
@@ -150,7 +154,7 @@ func (server Server) Run() {
 				}{}
 				err := c.ShouldBind(&m)
 				if err != nil {
-					c.JSON(http.StatusBadRequest, message.Fail())
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
 				ans := server.Userdao.Find(m.Username)
@@ -169,7 +173,7 @@ func (server Server) Run() {
 				err := c.ShouldBind(&user)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusBadRequest, message.Fail())
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
 				err = server.Userdao.Add(&user)
@@ -188,13 +192,13 @@ func (server Server) Run() {
 				err := c.ShouldBind(&user)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusBadRequest, message.Fail())
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
 				err = server.Userdao.Update(&user)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusInternalServerError, message.Fail())
+					c.JSON(http.StatusInternalServerError, fmt.Sprint(err))
 					return
 				}
 				c.JSON(http.StatusOK, message.Success())
@@ -205,13 +209,13 @@ func (server Server) Run() {
 				err := c.ShouldBind(&user)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusBadRequest, message.Fail())
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
 				err = server.Userdao.Del(user.Username)
 				if err != nil {
 					fmt.Println(err)
-					c.JSON(http.StatusInternalServerError, message.Fail())
+					c.JSON(http.StatusInternalServerError, fmt.Sprint(err))
 					return
 				}
 				c.JSON(http.StatusOK, message.Success())
@@ -231,7 +235,7 @@ func (server Server) Run() {
 					err := c.ShouldBind(&m)
 					if err != nil {
 						fmt.Println(err)
-						c.JSON(http.StatusBadRequest, message.Fail())
+						c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 						return
 					}
 					c.JSON(http.StatusOK, gin.H{
@@ -247,28 +251,28 @@ func (server Server) Run() {
 					var input entity.RoleEntity
 					err := c.ShouldBind(&input)
 					if err != nil {
-						c.JSON(http.StatusBadRequest, message.Fail())
+						c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 						return
 					}
 					if server.RoleDao.AddRole(input.Name) {
 						c.JSON(http.StatusOK, message.Success())
 						return
 					}
-					c.JSON(http.StatusForbidden, message.Fail())
+					c.JSON(http.StatusForbidden, fmt.Sprint(err))
 				})
 				//删除角色	/api/user/role/del
 				role.POST("/del", func(c *gin.Context) {
 					var input entity.RoleEntity
 					err := c.ShouldBind(&input)
 					if err != nil {
-						c.JSON(http.StatusBadRequest, message.Fail())
+						c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 						return
 					}
 					if server.RoleDao.Del(input.Name) {
 						c.JSON(http.StatusOK, message.Success())
 						return
 					}
-					c.JSON(http.StatusForbidden, message.Fail())
+					c.JSON(http.StatusForbidden, fmt.Sprint(err))
 				})
 				//为角色赋予权限	/api/user/role/permit
 				role.POST("/permit", func(c *gin.Context) {
@@ -278,14 +282,14 @@ func (server Server) Run() {
 					}{}
 					err := c.ShouldBind(&m)
 					if err != nil {
-						c.JSON(http.StatusBadRequest, message.Fail())
+						c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 						return
 					}
 					if server.RoleDao.AddAuth(m.ID, m.Auth) {
 						c.JSON(http.StatusOK, message.Success())
 						return
 					}
-					c.JSON(http.StatusForbidden, message.Fail())
+					c.JSON(http.StatusForbidden, fmt.Sprint(err))
 				})
 				//为角色移除权限	/api/user/role/ban
 				role.POST("/ban", func(c *gin.Context) {
@@ -295,14 +299,14 @@ func (server Server) Run() {
 					}{}
 					err := c.ShouldBind(&m)
 					if err != nil {
-						c.JSON(http.StatusBadRequest, message.Fail())
+						c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 						return
 					}
 					if server.RoleDao.DelAuth(m.ID, m.Auth) {
 						c.JSON(http.StatusOK, message.Success())
 						return
 					}
-					c.JSON(http.StatusForbidden, message.Fail())
+					c.JSON(http.StatusForbidden, fmt.Sprint(err))
 				})
 			}
 		}
@@ -442,17 +446,30 @@ func (server Server) Run() {
 				}{}
 				file, header, err := c.Request.FormFile("File")
 				if err != nil {
-					c.JSON(http.StatusBadRequest, message.Fail())
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
 				content, err := ioutil.ReadAll(file)
 				if err != nil {
-					c.JSON(http.StatusBadRequest, message.Fail)
+					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
-				err = c.ShouldBind(paper)
+				err = c.ShouldBind(&paper)
 				if err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"err": fmt.Sprint(err)})
+					return
+				}
+				username, _ := c.Cookie("username")
+				u, err := server.PaperDao.GetPaper(paper.PaperID)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				if u.UserName != username {
+					c.JSON(http.StatusForbidden, gin.H{
+						"msg": "not auth",
+					})
+					return
 				}
 				err = server.PaperDao.AddFile(&entity.PaperFile{
 					PaperID:  paper.PaperID,
@@ -465,6 +482,10 @@ func (server Server) Run() {
 					return
 				}
 				c.JSON(http.StatusOK, message.Success())
+			})
+			//下载附件 /api/paper/getfile
+			paper.POST("/getfile", func(c *gin.Context) {
+
 			})
 
 			//管理员的操作
