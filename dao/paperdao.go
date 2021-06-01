@@ -193,3 +193,9 @@ func (paperdao PaperDao) GetPaper(paperid uint) (entity.PaperEntity, error) {
 	err := paperdao.db.DB.Model(entity.PaperEntity{}).Find(&paper, paperid).Error
 	return paper, err
 }
+
+func (paperdao PaperDao) GetFile(paperid uint) (entity.PaperFile, error) {
+	var file entity.PaperFile
+	err := paperdao.db.DB.Model(&entity.PaperFile{}).Where("paper_id = ?", paperid).Find(&file).Error
+	return file, err
+}

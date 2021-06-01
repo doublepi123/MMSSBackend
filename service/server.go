@@ -5,6 +5,7 @@ import (
 	"MMSSBackend/entity"
 	"MMSSBackend/message"
 	"MMSSBackend/util"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
@@ -485,7 +486,31 @@ func (server Server) Run() {
 			})
 			//下载附件 /api/paper/getfile
 			paper.POST("/getfile", func(c *gin.Context) {
-
+				paper := struct {
+					PaperID uint
+				}{}
+				c.ShouldBind(&paper)
+				username, _ := c.Cookie("username")
+				u, err := server.PaperDao.GetPaper(paper.PaperID)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				if username != u.UserName {
+					util.MeetError(c, errors.New("not auth"))
+					return
+				}
+				file, err := server.PaperDao.GetFile(paper.PaperID)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				c.Writer.WriteHeader(http.StatusOK)
+				content := file.File
+				c.Header("Content-Disposition", "attachment; filename="+file.FileName)
+				c.Header("Content-Type", "application/text/plain")
+				c.Header("Accept-Length", fmt.Sprintf("%d", len(content)))
+				c.Writer.Write([]byte(content))
 			})
 
 			//管理员的操作
