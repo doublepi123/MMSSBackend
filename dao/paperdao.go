@@ -147,3 +147,17 @@ func (paperdao PaperDao) UnCheck(paperid uint) error {
 	}
 	return paperdao.db.DB.Model(&entity.PaperEntity{}).Where("id = ?", paperid).Update("hascheck", false).Error
 }
+
+func (paperdao PaperDao) Update(paper entity.PaperEntity) error {
+	var old entity.PaperEntity
+	err := paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ? AND tittle = ?",
+		paper.UserName, paper.Tittle).First(&old).Error
+	if err != nil {
+		return err
+	}
+	if old.Hascheck == true {
+		return errors.New("canot be updated")
+	}
+	return paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ? AND tittle = ?",
+		paper.UserName, paper.Tittle).Updates(&paper).Error
+}

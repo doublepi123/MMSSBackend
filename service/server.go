@@ -397,6 +397,22 @@ func (server Server) Run() {
 				}
 				c.JSON(http.StatusOK, message.Success())
 			})
+			//更新文章信息 /api/paper/update
+			paper.POST("/update", func(c *gin.Context) {
+				var paper entity.PaperEntity
+				err := c.ShouldBind(&paper)
+				if err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprint(err)})
+					return
+				}
+				err = server.PaperDao.Update(paper)
+				if err != nil {
+					fmt.Println(err)
+					c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprint(err)})
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
 			//查询非第一作者paper /api/paper/findother
 			paper.POST("/findother", func(c *gin.Context) {
 				username, _ := c.Cookie("username")
