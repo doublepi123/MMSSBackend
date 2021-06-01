@@ -463,7 +463,7 @@ func (server Server) Run() {
 					c.JSON(http.StatusOK, paper)
 				})
 				//查询某篇论文 /api/paper/admin/find
-				paper.POST("/find", func(c *gin.Context) {
+				papera.POST("/find", func(c *gin.Context) {
 					m := &entity.PaperEntity{}
 					err := c.ShouldBind(m)
 					if err != nil {
