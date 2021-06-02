@@ -53,3 +53,7 @@ func (userdao UserDao) UserList() []entity.SimpleUser {
 	userdao.db.DB.Model(&entity.UserEntity{}).Find(&users)
 	return users
 }
+
+func (userdao UserDao) Logout(username string) error {
+	return userdao.db.Redis.Del(username).Err()
+}

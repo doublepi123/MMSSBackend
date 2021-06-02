@@ -92,6 +92,15 @@ func (server Server) Run() {
 	//进入api路径前检查登入状态
 	api := r.Group("/api", server.CheckLogin)
 	{
+		api.GET("/logout", func(c *gin.Context) {
+			username, _ := c.Cookie("username")
+			err := server.Userdao.Logout(username)
+			if err != nil {
+				util.MeetError(c, err)
+				return
+			}
+			c.JSON(http.StatusOK, message.Success())
+		})
 		//查询当前用户的用户名 /api/username
 		api.GET("/username", func(c *gin.Context) {
 			username, _ := c.Cookie("username")
