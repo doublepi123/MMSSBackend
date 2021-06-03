@@ -38,7 +38,7 @@ func (server Server) CheckLogin(c *gin.Context) {
 	username, _ := c.Cookie("username")
 	userid, _ := c.Cookie("userid")
 	if !server.Cookiedao.CheckCookie(username, userid) {
-		c.JSON(http.StatusForbidden, gin.H{"msg": "not login"})
+		c.JSON(http.StatusGone, gin.H{"msg": "not login"})
 		c.Abort()
 		return
 	}
