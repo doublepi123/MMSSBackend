@@ -15,8 +15,8 @@ type PaperEntity struct {
 	Date string
 	//期刊
 	Journals string
-	//作者
-	Author string
+	//ISSN
+	ISSN string
 	//学院
 	College string
 	//其他
