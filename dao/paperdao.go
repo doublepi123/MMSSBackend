@@ -238,5 +238,5 @@ func (paperdao PaperDao) CheckJournal(id uint) error {
 func (paperdao PaperDao) AddJournal(journal entity.Journal) error {
 	journal.Hascheck = false
 	paperdao.db.DB.AutoMigrate(&entity.Journal{})
-	return paperdao.db.DB.Model(&entity.Journal{}).Create(journal).Error
+	return paperdao.db.DB.Model(&entity.Journal{}).Create(&journal).Error
 }
