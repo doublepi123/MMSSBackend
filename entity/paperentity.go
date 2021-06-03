@@ -11,6 +11,9 @@ type Journal struct {
 	UpdatedAt time.Time
 	Name      string `gorm:"unique"`
 	Hascheck  bool
+	ISSN      string
+	CN        string
+	Other     string
 }
 
 //论文Model
