@@ -521,7 +521,11 @@ func (server Server) Run() {
 				c.Header("Accept-Length", fmt.Sprintf("%d", len(content)))
 				c.Writer.Write([]byte(content))
 			})
-
+			//获取某人所有的paperlist（包括不是本人的论文）/api/paper/alllist
+			paper.GET("/alllist", func(c *gin.Context) {
+				username, _ := c.Cookie("username")
+				c.JSON(http.StatusOK, server.PaperDao.GetSomeoneAllPaper(username))
+			})
 			//管理员的操作
 			papera := paper.Group("/admin", server.paperAdmin)
 			{

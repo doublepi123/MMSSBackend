@@ -107,7 +107,6 @@ func (paperdao PaperDao) AuthSelect(username string) ([]entity.PaperEntity, erro
 func (paperdao PaperDao) AddFile(file *entity.PaperFile) error {
 	tx := paperdao.db.DB.Begin()
 	var count int64
-	fmt.Println(file.ID)
 	err := tx.Model(&entity.PaperEntity{}).Where("id = ?", file.PaperID).Count(&count).Error
 	if err != nil {
 		tx.Rollback()
@@ -198,4 +197,20 @@ func (paperdao PaperDao) GetFile(paperid uint) (entity.PaperFile, error) {
 	var file entity.PaperFile
 	err := paperdao.db.DB.Model(&entity.PaperFile{}).Where("paper_id = ?", paperid).Find(&file).Error
 	return file, err
+}
+
+func (paperdao PaperDao) GetSomeoneAllPaper(username string) []entity.PaperList {
+	var paperlist []entity.PaperList
+	var ans []entity.PaperList
+	var user entity.UserEntity
+	var paperauth []entity.PaperAuth
+	paperdao.db.DB.Model(&entity.PaperEntity{}).Where("user_name = ?", username).Find(&paperlist)
+	ans = append(ans, paperlist...)
+	paperdao.db.DB.Model(&entity.UserEntity{}).Where("username = ?", username).Find(&user)
+	paperdao.db.DB.Model(&entity.PaperAuth{}).Where("work_id = ?", user.WorkID).Find(&paperauth)
+	for i := range paperauth {
+		paperdao.db.DB.Model(&entity.PaperEntity{}).Find(&paperlist, paperauth[i].PaperID)
+		ans = append(ans, paperlist...)
+	}
+	return ans
 }
