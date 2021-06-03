@@ -64,4 +64,5 @@ type PaperAuth struct {
 	gorm.Model
 	PaperID uint
 	WorkID  string
+	Other   string
 }
