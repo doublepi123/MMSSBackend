@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+type Journal struct {
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string `gorm:"unique"`
+	Hascheck  bool
+}
+
 //论文Model
 type PaperEntity struct {
 	gorm.Model
@@ -15,7 +23,7 @@ type PaperEntity struct {
 	//发表日期
 	Date string
 	//期刊
-	Journals string `gorm:"index"`
+	Journals uint `gorm:"index"`
 	//ISSN
 	ISSN string
 	//其他

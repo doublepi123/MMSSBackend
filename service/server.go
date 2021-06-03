@@ -347,7 +347,7 @@ func (server Server) Run() {
 
 				c.JSON(http.StatusOK, message.Success())
 			})
-			//查看自己的paperList
+			//查看自己的paperList	/api/paper/list
 			paper.GET("/list", func(c *gin.Context) {
 				username, _ := c.Cookie("username")
 				paper, err := server.PaperDao.Paperlist(username)
@@ -521,11 +521,62 @@ func (server Server) Run() {
 				c.Header("Accept-Length", fmt.Sprintf("%d", len(content)))
 				c.Writer.Write([]byte(content))
 			})
-			//获取某人所有的paperlist（包括不是本人的论文）/api/paper/alllist
+			//获取某人所有的paperlist（包括不是本人为第一作者的论文）/api/paper/alllist
 			paper.GET("/alllist", func(c *gin.Context) {
 				username, _ := c.Cookie("username")
 				c.JSON(http.StatusOK, server.PaperDao.GetSomeoneAllPaper(username))
 			})
+			//期刊
+			journal := paper.Group("/journal")
+			{
+				//获取期刊列表 /api/paper/journal/list
+				journal.GET("/list", func(c *gin.Context) {
+					c.JSON(http.StatusOK, server.PaperDao.GetJournalList())
+				})
+				//添加期刊	/api/paper/journal/add
+				journal.POST("/add", func(c *gin.Context) {
+					var journal entity.Journal
+					err := c.ShouldBind(&journal)
+					if err != nil {
+						util.MeetError(c, err)
+						return
+					}
+					err = server.PaperDao.AddJournal(journal)
+					if err != nil {
+						util.MeetError(c, err)
+						return
+					}
+					c.JSON(http.StatusOK, message.Success())
+				})
+				ja := journal.Group("/admin", server.paperAdmin)
+				{
+					//获取期刊列表 /api/paper/journal/admin/list
+					ja.GET("/list", func(c *gin.Context) {
+						c.JSON(http.StatusOK, server.PaperDao.GetJournalList())
+					})
+					//获取未审核期刊列表	/api/paper/journal/admin/uncheck
+					ja.GET("/uncheck", func(c *gin.Context) {
+						c.JSON(http.StatusOK, server.PaperDao.GetUncheckJournalList())
+					})
+					//审核某个期刊信息	/api/paper/journal/admin/check 发送字段仅为 ID
+					ja.POST("/check", func(c *gin.Context) {
+						m := struct {
+							ID uint
+						}{}
+						err := c.ShouldBind(&m)
+						if err != nil {
+							util.MeetError(c, err)
+							return
+						}
+						err = server.PaperDao.CheckJournal(m.ID)
+						if err != nil {
+							util.MeetError(c, err)
+							return
+						}
+						c.JSON(http.StatusOK, message.Success())
+					})
+				}
+			}
 			//管理员的操作
 			papera := paper.Group("/admin", server.paperAdmin)
 			{

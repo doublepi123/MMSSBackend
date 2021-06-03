@@ -214,3 +214,28 @@ func (paperdao PaperDao) GetSomeoneAllPaper(username string) []entity.PaperList 
 	}
 	return ans
 }
+
+func (paperdao PaperDao) GetJournalList() []entity.Journal {
+	var journallist []entity.Journal
+	paperdao.db.DB.Model(&entity.Journal{}).Find(&journallist)
+	return journallist
+}
+
+func (paperdao PaperDao) GetUncheckJournalList() []entity.Journal {
+	var journallist []entity.Journal
+	paperdao.db.DB.Model(&entity.Journal{}).Where("hascheck = ?", false).Find(&journallist)
+	return journallist
+}
+
+func (paperdao PaperDao) CheckJournal(id uint) error {
+	err := paperdao.db.DB.Model(&entity.Journal{}).Where("id = ?", id).Update("hascheck", true).Error
+	if err != nil {
+		return errors.New("id not find")
+	}
+	return err
+}
+
+func (paperdao PaperDao) AddJournal(journal entity.Journal) error {
+	journal.Hascheck = false
+	return paperdao.db.DB.Model(&entity.Journal{}).Create(journal).Error
+}
