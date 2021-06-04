@@ -235,6 +235,10 @@ func (paperdao PaperDao) CheckJournal(id uint) error {
 	return err
 }
 
+func (paperdao PaperDao) DelJournal(id uint) error {
+	return paperdao.db.DB.Model(&entity.Journal{}).Delete(&entity.Journal{}, id).Error
+}
+
 func (paperdao PaperDao) AddJournal(journal entity.Journal) error {
 	journal.Hascheck = false
 	paperdao.db.DB.AutoMigrate(&entity.Journal{})

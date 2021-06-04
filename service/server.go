@@ -575,6 +575,22 @@ func (server Server) Run() {
 						}
 						c.JSON(http.StatusOK, message.Success())
 					})
+					ja.DELETE("/delete", func(c *gin.Context) {
+						m := struct {
+							ID uint
+						}{}
+						err := c.ShouldBind(&m)
+						if err != nil {
+							util.MeetError(c, err)
+							return
+						}
+						err = server.PaperDao.DelJournal(m.ID)
+						if err != nil {
+							util.MeetError(c, err)
+							return
+						}
+						c.JSON(http.StatusOK, message.Success())
+					})
 				}
 			}
 			//管理员的操作
