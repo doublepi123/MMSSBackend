@@ -331,6 +331,7 @@ func (server Server) Run() {
 				username, _ := c.Cookie("username")
 				err := c.ShouldBind(m)
 				if err != nil {
+					fmt.Println(err)
 					c.JSON(http.StatusBadRequest, gin.H{
 						"msg": err,
 					})
