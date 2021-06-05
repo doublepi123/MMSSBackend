@@ -325,6 +325,7 @@ func (server Server) Run() {
 			//该path下的接口仅可对自己的论文进行操作
 			//添加paper /api/paper/add
 			paper.POST("/add", func(c *gin.Context) {
+				util.ShowBody(c)
 				m := &entity.PaperEntity{}
 				m.Hascheck = false
 				username, _ := c.Cookie("username")
