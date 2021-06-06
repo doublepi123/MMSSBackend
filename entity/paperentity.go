@@ -57,7 +57,7 @@ type PaperFile struct {
 	//PaperID
 	PaperID uint `gorm:"primarykey"`
 	//二进制文件内容
-	File []byte `gorm:"index"`
+	File []byte
 	//文件名
 	FileName string `gorm:"index"`
 }
