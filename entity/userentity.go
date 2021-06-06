@@ -2,7 +2,6 @@ package entity
 
 import (
 	"gorm.io/gorm"
-	"time"
 )
 
 // Level 0 Administrator
@@ -18,10 +17,10 @@ type UserEntity struct {
 	WorkID        string `gorm:"not null"`
 	Tittle        string
 	Sex           string
-	BirthDay      time.Time
+	BirthDay      string
 	Phone         string
 	Address       string
-	StartWorkTime time.Time
+	StartWorkTime string
 }
 
 // 返回给前端的用户列表
