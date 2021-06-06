@@ -10,6 +10,17 @@ type PaperDao struct {
 	*Dao
 }
 
+//删除paper
+func (paperdao PaperDao) Del(id uint) error {
+	return paperdao.db.DB.Model(&entity.PaperEntity{}).Delete(&entity.PaperEntity{}, id).Error
+}
+
+func (paperdao PaperDao) FindByID(id uint) (entity.PaperEntity, error) {
+	var ans entity.PaperEntity
+	err := paperdao.db.DB.Model(&entity.PaperEntity{}).Find(&ans, id).Error
+	return ans, err
+}
+
 //添加paper
 func (paperdao PaperDao) Add(paper *entity.PaperEntity) error {
 	var count int64

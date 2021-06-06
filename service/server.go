@@ -349,6 +349,29 @@ func (server Server) Run() {
 
 				c.JSON(http.StatusOK, message.Success())
 			})
+			//删除自己的论文 /api/paper/del
+			paper.POST("/del", func(c *gin.Context) {
+				username, _ := c.Cookie("username")
+				m := struct {
+					PaperID uint
+				}{}
+				paper, err := server.PaperDao.FindByID(m.PaperID)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				if paper.UserName != username {
+					c.JSON(http.StatusForbidden, gin.H{
+						"msg": "not auth",
+					})
+				}
+				err = server.PaperDao.Del(m.PaperID)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
 			//查看自己的paperList	/api/paper/list
 			paper.GET("/list", func(c *gin.Context) {
 				username, _ := c.Cookie("username")
