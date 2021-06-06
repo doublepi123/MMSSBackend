@@ -521,6 +521,23 @@ func (server Server) Run() {
 				}
 				c.JSON(http.StatusOK, message.Success())
 			})
+			//删除某人的文章 /api/paper/delete
+			paper.DELETE("/delete", func(c *gin.Context) {
+				m := struct {
+					ID uint
+				}{}
+				err := c.ShouldBind(&m)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				err = server.PaperDao.DelJournal(m.ID)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
 			//下载附件 /api/paper/getfile
 			paper.POST("/getfile", func(c *gin.Context) {
 				paper := struct {
