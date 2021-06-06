@@ -600,6 +600,7 @@ func (server Server) Run() {
 						}
 						c.JSON(http.StatusOK, message.Success())
 					})
+					//删除某个期刊信息	/api/paper/journal/admin/delete 发送字段仅为 ID
 					ja.DELETE("/delete", func(c *gin.Context) {
 						m := struct {
 							ID uint
