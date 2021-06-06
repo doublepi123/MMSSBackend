@@ -478,6 +478,7 @@ func (server Server) Run() {
 			})
 			//添加附件 /api/paper/addfile
 			paper.POST("/addfile", func(c *gin.Context) {
+				util.ShowBody(c)
 				paper := struct {
 					PaperID uint
 				}{}
