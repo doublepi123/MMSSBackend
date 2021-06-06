@@ -500,6 +500,7 @@ func (server Server) Run() {
 					util.MeetError(c, err)
 					return
 				}
+				fmt.Println(u.UserName, username)
 				if u.UserName != username {
 					c.JSON(http.StatusForbidden, gin.H{
 						"msg": "not auth",
