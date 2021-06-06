@@ -481,17 +481,17 @@ func (server Server) Run() {
 				}{}
 				file, header, err := c.Request.FormFile("File")
 				if err != nil {
-					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
+					util.MeetError(c, err)
 					return
 				}
 				content, err := ioutil.ReadAll(file)
 				if err != nil {
-					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
+					util.MeetError(c, err)
 					return
 				}
 				err = c.ShouldBind(&paper)
 				if err != nil {
-					c.JSON(http.StatusBadRequest, gin.H{"err": fmt.Sprint(err)})
+					util.MeetError(c, err)
 					return
 				}
 				username, _ := c.Cookie("username")
