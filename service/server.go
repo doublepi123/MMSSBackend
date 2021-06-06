@@ -522,7 +522,7 @@ func (server Server) Run() {
 				c.JSON(http.StatusOK, message.Success())
 			})
 			//删除某人的文章 /api/paper/delete
-			paper.DELETE("/delete", func(c *gin.Context) {
+			paper.POST("/delete", func(c *gin.Context) {
 				m := struct {
 					ID uint
 				}{}
