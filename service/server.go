@@ -434,6 +434,7 @@ func (server Server) Run() {
 				}{}
 				err := c.ShouldBind(m)
 				if err != nil {
+					fmt.Println(err)
 					c.JSON(http.StatusBadRequest, gin.H{
 						"msg": fmt.Sprint(err),
 					})
@@ -442,6 +443,7 @@ func (server Server) Run() {
 				username, _ := c.Cookie("username")
 				err = server.PaperDao.Auth(m.WorkID, m.PaperID, username)
 				if err != nil {
+					fmt.Println(err)
 					c.JSON(http.StatusBadRequest, gin.H{
 						"msg": fmt.Sprint(err),
 					})
