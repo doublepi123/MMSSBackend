@@ -43,6 +43,10 @@ type PaperList struct {
 	ID uint
 	//标题
 	Tittle string
+	//用户名
+	UserName string
+	//作者
+	Author string `gorm:"-"`
 	//日期
 	Date string
 	//审核状态
