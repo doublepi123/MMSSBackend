@@ -206,8 +206,8 @@ func (server Server) Run() {
 					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
-				err = server.Userdao.Update(&user)
 				user.Password = ""
+				err = server.Userdao.Update(&user)
 				if err != nil {
 					fmt.Println(err)
 					c.JSON(http.StatusInternalServerError, fmt.Sprint(err))
