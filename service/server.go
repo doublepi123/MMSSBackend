@@ -427,6 +427,7 @@ func (server Server) Run() {
 			})
 			//添加其他作者 /api/paper/auth
 			paper.POST("/auth", func(c *gin.Context) {
+				util.ShowBody(c)
 				m := &struct {
 					PaperID uint
 					WorkID  string
