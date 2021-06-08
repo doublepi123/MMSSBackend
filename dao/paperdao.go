@@ -180,17 +180,19 @@ func (paperdao PaperDao) UnCheck(paperid uint) error {
 
 func (paperdao PaperDao) Paperlist(username string) ([]entity.PaperList, error) {
 	var paper []entity.PaperList
-	var auth []entity.PaperAuth
+
 	var user entity.UserEntity
 	err := paperdao.db.DB.Model(entity.PaperEntity{}).Where("user_name = ?", username).Find(&paper).Error
 	if err != nil {
 		return paper, err
 	}
 	for i := range paper {
+		var auth []entity.PaperAuth
 		paperdao.db.DB.Model(&entity.UserEntity{}).Where("username = ?", paper[i].UserName).Find(&user)
 		paper[i].Author = user.Name
 		paperdao.db.DB.Model(&entity.PaperAuth{}).Where("paper_id = ?", paper[i].ID).Find(&auth)
 		for j := range auth {
+			var user entity.UserEntity
 			paperdao.db.DB.Model(&entity.UserEntity{}).Where("work_id = ?", auth[j].WorkID).Find(&user)
 			paper[i].Author += " " + user.Name
 		}

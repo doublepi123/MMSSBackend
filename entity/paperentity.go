@@ -31,6 +31,8 @@ type PaperEntity struct {
 	ISSN string
 	//其他
 	Other string
+	//
+	Listother string
 	//附件文件名
 	Filename string
 	//审核状态
@@ -48,7 +50,8 @@ type PaperList struct {
 	//作者
 	Author string `gorm:"-"`
 	//日期
-	Date string
+	Date      string
+	Listother string
 	//审核状态
 	Hascheck bool
 	//附件文件名
