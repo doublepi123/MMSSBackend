@@ -145,6 +145,7 @@ func (server Server) Run() {
 					return
 				}
 				m.Username = username
+				m.Password = ""
 				err = server.Userdao.Update(&m)
 				if err != nil {
 					fmt.Println(err)
