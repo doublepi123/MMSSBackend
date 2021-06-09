@@ -110,6 +110,7 @@ func (server Server) Run() {
 		{
 			//修改自己的密码 /api/self/changepwd 	仅两个字段：Oldpassword password
 			self.POST("/changepwd", func(c *gin.Context) {
+				util.ShowBody(c)
 				m := struct {
 					Oldpassword string
 					Password    string
