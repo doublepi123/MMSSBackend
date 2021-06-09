@@ -207,8 +207,8 @@ func (server Server) Run() {
 					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 					return
 				}
-				err = server.Userdao.Update(&user)
 				user.Password = ""
+				err = server.Userdao.Update(&user)
 				if err != nil {
 					fmt.Println(err)
 					c.JSON(http.StatusInternalServerError, fmt.Sprint(err))
@@ -428,12 +428,14 @@ func (server Server) Run() {
 			})
 			//添加其他作者 /api/paper/auth
 			paper.POST("/auth", func(c *gin.Context) {
+				util.ShowBody(c)
 				m := &struct {
 					PaperID uint
 					WorkID  string
 				}{}
 				err := c.ShouldBind(m)
 				if err != nil {
+					fmt.Println(err)
 					c.JSON(http.StatusBadRequest, gin.H{
 						"msg": fmt.Sprint(err),
 					})
@@ -442,6 +444,7 @@ func (server Server) Run() {
 				username, _ := c.Cookie("username")
 				err = server.PaperDao.Auth(m.WorkID, m.PaperID, username)
 				if err != nil {
+					fmt.Println(err)
 					c.JSON(http.StatusBadRequest, gin.H{
 						"msg": fmt.Sprint(err),
 					})
@@ -479,7 +482,6 @@ func (server Server) Run() {
 			})
 			//添加附件 /api/paper/addfile
 			paper.POST("/addfile", func(c *gin.Context) {
-				util.ShowBody(c)
 				paper := struct {
 					PaperID uint
 				}{}
@@ -519,6 +521,23 @@ func (server Server) Run() {
 				if err != nil {
 					fmt.Println(err)
 					c.JSON(http.StatusBadRequest, fmt.Sprint(err))
+					return
+				}
+				c.JSON(http.StatusOK, message.Success())
+			})
+			//删除某人的文章 /api/paper/delete
+			paper.POST("/delete", func(c *gin.Context) {
+				m := struct {
+					ID uint
+				}{}
+				err := c.ShouldBind(&m)
+				if err != nil {
+					util.MeetError(c, err)
+					return
+				}
+				err = server.PaperDao.DelJournal(m.ID)
+				if err != nil {
+					util.MeetError(c, err)
 					return
 				}
 				c.JSON(http.StatusOK, message.Success())

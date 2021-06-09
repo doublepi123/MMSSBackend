@@ -31,6 +31,8 @@ type PaperEntity struct {
 	ISSN string
 	//其他
 	Other string
+	//
+	Listother string
 	//附件文件名
 	Filename string
 	//审核状态
@@ -43,8 +45,13 @@ type PaperList struct {
 	ID uint
 	//标题
 	Tittle string
+	//用户名
+	UserName string
+	//作者
+	Author string `gorm:"-"`
 	//日期
-	Date string
+	Date      string
+	Listother string
 	//审核状态
 	Hascheck bool
 	//附件文件名
@@ -57,7 +64,7 @@ type PaperFile struct {
 	//PaperID
 	PaperID uint `gorm:"primarykey"`
 	//二进制文件内容
-	File []byte `gorm:"index"`
+	File []byte
 	//文件名
 	FileName string `gorm:"index"`
 }
