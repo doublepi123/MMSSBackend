@@ -31,7 +31,7 @@ func (server Server) login(c *gin.Context) {
 		c.JSON(http.StatusOK, message.Success())
 		return
 	}
-	c.JSON(http.StatusForbidden, gin.H{"msg": "password wrong"})
+	c.JSON(http.StatusConflict, gin.H{"msg": "password wrong"})
 }
 
 func (server Server) CheckLogin(c *gin.Context) {
