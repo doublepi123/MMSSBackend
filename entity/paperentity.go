@@ -72,7 +72,7 @@ type PaperFile struct {
 //其他作者权限
 type PaperAuth struct {
 	gorm.Model
-	PaperID uint
-	WorkID  string
+	PaperID uint   `gorm:"not null"`
+	WorkID  string `gorm:"not null"`
 	Other   string
 }
