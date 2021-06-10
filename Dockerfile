@@ -1,7 +1,8 @@
 FROM golang:latest
 
-WORKDIR $GOPATH/src/github.com/doublepi123/mmssbackend
-COPY . $GOPATH/src/github.com/doubelpi123/mmssbackend
+WORKDIR /data
+RUN git clone https://github.com/doublepi123/mmssbackend
+WORKDIR /data/mmssbackend
 RUN go build .
 
 EXPOSE 58888
