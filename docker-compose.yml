@@ -12,8 +12,7 @@ services:
     expose:
       - 3306
     volumes:
-      - ./db/data:/var/lib/mysql
-      - ./db/initdb.d:/docker-entrypoint-initdb.d
+      - /data/mmss/mysql:/var/lib/mysql
     ports:
       - 127.0.0.1:3306:3306
   redis:
