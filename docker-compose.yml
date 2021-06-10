@@ -34,7 +34,7 @@ services:
     build: .
     environment:
       DSN: root:lcyzuishuai@tcp(mmss_mariadb:3306)/MMSS?charset=utf8mb4&parseTime=True&loc=Local
-      Redis_Host: mmss_redis
+      redis_host: mmss_redis
     networks:
       - mmss
     ports:
