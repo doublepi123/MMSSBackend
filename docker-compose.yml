@@ -14,7 +14,8 @@ services:
     volumes:
       - ./db/data:/var/lib/mysql
       - ./db/initdb.d:/docker-entrypoint-initdb.d
-
+    ports:
+      - 127.0.0.1:3306:3306
   redis:
     container_name: mmss_redis
     image: redis
