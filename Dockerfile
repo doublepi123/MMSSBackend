@@ -6,4 +6,4 @@ WORKDIR /data/MMSSbackend
 RUN go build .
 
 EXPOSE 58888
-ENTRYPOINT ["./MMSSbackend"]
+ENTRYPOINT ["/bin/bash"]
