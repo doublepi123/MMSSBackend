@@ -41,6 +41,8 @@ services:
       - 58888
 
   nginx:
+    depends_on:
+      - core
     container_name: mmss_nginx
     networks:
       - mmss
