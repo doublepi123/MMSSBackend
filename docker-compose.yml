@@ -39,9 +39,6 @@ services:
       - mmss
     expose:
       - 58888
-    links:
-      - mariadb
-      - redis
 
   nginx:
     container_name: mmss_nginx
