@@ -37,6 +37,7 @@ services:
       - mmss
     expose:
       - 58888
+    restart: always
 
   nginx:
     depends_on:
