@@ -26,22 +26,32 @@ services:
     volumes:
       - ./data:/data
 
-  backend:
+  core:
     depends_on:
       - redis
       - mariadb
-    container_name: mmss
+    container_name: mmss_core
     build: .
     environment:
       DSN: root:lcyzuishuai@tcp(mmss_mariadb:3306)/MMSS?charset=utf8mb4&parseTime=True&loc=Local
       redis_host: mmss_redis
     networks:
       - mmss
-    ports:
-    - 58888:58888
+    expose:
+      - 58888
     links:
       - mariadb
       - redis
+
+    nginx:
+      container_name: nginx
+        image: nginx
+        volumes:
+          - ./conf:/etc/nginx/conf.d
+          - ./html:/html
+        restart: always
+        ports:
+          - "8080:80"
 
 networks:
   mmss:
