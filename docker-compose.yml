@@ -27,6 +27,9 @@ services:
       - ./data:/data
 
   backend:
+    depends_on:
+      - redis
+      - mariadb
     container_name: mmss
     build: .
     environment:
