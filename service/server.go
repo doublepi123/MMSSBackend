@@ -5,7 +5,6 @@ import (
 	"MMSSBackend/entity"
 	"MMSSBackend/message"
 	"MMSSBackend/util"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
