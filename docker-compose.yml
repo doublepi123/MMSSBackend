@@ -1,0 +1,39 @@
+version "3.9"
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: lcyzuishuai
+      MYSQL_DATABASE: 'MMSS'
+    networks:
+      - mmss
+    volumes:
+      - ./db/data:/var/lib/mysql
+      - ./db/initdb.d:/docker-entrypoint-initdb.d
+
+  redis:
+    container_name: redis
+    image: redis
+    restart: always
+    networks:
+      - mmss
+    volumes:
+      - ./data:/data
+
+  backend:
+    container_name: mmss
+    build: .
+    environment:
+      DSN: root:lcyzuishuai@tcp(127.0.0.1:3306)/MMSS?charset=utf8mb4&parseTime=True&loc=Local
+    networks:
+      - mmss
+    ports:
+    - 58888:58888
+    links:
+      - mariadb
+      - redis
+
+networks:
+  mmss:
