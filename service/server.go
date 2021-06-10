@@ -556,10 +556,10 @@ func (server Server) Run() {
 					util.MeetError(c, err)
 					return
 				}
-				if username != u.UserName {
-					util.MeetError(c, errors.New("not auth"))
-					return
-				}
+				//if username != u.UserName {
+				//	util.MeetError(c, errors.New("not auth"))
+				//	return
+				//}
 				file, err := server.PaperDao.GetFile(paper.PaperID)
 				if err != nil {
 					util.MeetError(c, err)
