@@ -45,13 +45,15 @@ services:
 
     nginx:
       container_name: nginx
-        image: nginx
-        volumes:
-          - ./conf:/etc/nginx/conf.d
-          - ./html:/html
-        restart: always
-        ports:
-          - "8080:80"
+      networks:
+        - mmss
+      image: nginx
+      volumes:
+        - ./conf:/etc/nginx/conf.d
+        - ./html:/html
+      restart: always
+      ports:
+        - "8080:80"
 
 networks:
   mmss:
