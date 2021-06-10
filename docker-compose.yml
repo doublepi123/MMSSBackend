@@ -31,7 +31,7 @@ services:
       - redis
       - mariadb
     container_name: mmss_core
-    build: .
+    build: ./build
     environment:
       DSN: root:lcyzuishuai@tcp(mmss_mariadb:3306)/MMSS?charset=utf8mb4&parseTime=True&loc=Local
       redis_host: mmss_redis
