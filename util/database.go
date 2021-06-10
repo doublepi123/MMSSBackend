@@ -40,7 +40,7 @@ func (db *Database) Init() {
 	sqlDB.SetConnMaxIdleTime(time.Hour)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	db.Redis = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     os.Getenv("redis_host") + ":6379",
 		Password: "", // no password set
 		DB:       2,  // use DB 2
 	})

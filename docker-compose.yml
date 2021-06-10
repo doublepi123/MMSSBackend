@@ -26,7 +26,8 @@ services:
     container_name: mmss
     build: .
     environment:
-      DSN: root:lcyzuishuai@tcp(127.0.0.1:3306)/MMSS?charset=utf8mb4&parseTime=True&loc=Local
+      DSN: root:lcyzuishuai@tcp(mmss_mariadb:3306)/MMSS?charset=utf8mb4&parseTime=True&loc=Local
+      Redis_Host: mmss_redis
     networks:
       - mmss
     ports:
