@@ -44,7 +44,7 @@ services:
       - redis
 
   nginx:
-    container_name: nginx
+    container_name: mmss_nginx
     networks:
       - mmss
     image: nginx
