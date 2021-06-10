@@ -5,6 +5,7 @@ import (
 	"MMSSBackend/entity"
 	"MMSSBackend/message"
 	"MMSSBackend/util"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
@@ -555,10 +556,11 @@ func (server Server) Run() {
 					util.MeetError(c, err)
 					return
 				}
-				//if username != u.UserName {
-				//	util.MeetError(c, errors.New("not auth"))
-				//	return
-				//}
+				if username != u.UserName {
+					//util.MeetError(c, errors.New("not auth"))
+					//return
+					fmt.Println(errors.New("not auth"))
+				}
 				file, err := server.PaperDao.GetFile(paper.PaperID)
 				if err != nil {
 					util.MeetError(c, err)
